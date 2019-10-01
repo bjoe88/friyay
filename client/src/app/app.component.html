@@ -1,0 +1,52 @@
+<style>
+textarea {
+    width: calc(100% - 20px);
+    margin-left: 10px;
+    background-color: #fff;
+    font-size: 1.2em;
+    resize: none;
+    border: none;
+}
+</style>
+<div no-border>
+  <div color="tertiary">
+    <div>Live Chat</div>
+  </div>
+</div>
+
+<div>
+
+  <div>
+    <div>
+      There are currently <strong>{{users}}</strong> users online. Start chatting!
+    </div>
+  </div>
+
+  <div lines="none">
+
+    <div *ngFor="let message of messages">
+      {{message}}
+    </div>
+
+  </div>
+
+</div>
+
+<div>
+
+  <div>
+
+    <textarea spellcheck="true" autoComplete="true" autocorrect="true" rows="1" class="chat-input" [(ngModel)]="message"
+      placeholder="type message..." (keyup.enter)="addChat()">
+		</textarea>
+
+    <div slot="primary">
+      <div (click)="addChat()" slot="end" class="send-chat-button">
+        <div slot="icon-only" name="send"></div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+<router-outlet></router-outlet>
