@@ -41,12 +41,20 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { HeaderComponent } from './shared/component/header/header.component';
+import { HomeComponent } from './page/home/home.component';
+import { GameComponent } from './page/game/game.component';
+import { AdminComponent } from './page/admin/admin.component';
 
 const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    HeaderComponent,
+    HomeComponent,
+    GameComponent,
+    AdminComponent
   ],
   imports: [
     BrowserModule,

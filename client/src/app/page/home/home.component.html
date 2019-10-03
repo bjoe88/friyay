@@ -1,0 +1,25 @@
+<app-header></app-header>
+
+<div [ngClass]="{'bgcolor-primary': true}">
+  <div class="example-button-row">
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <a [routerLink]="[ '/game' ]">
+      <button mat-flat-button color="warn">Join</button>
+    </a>
+    &nbsp;
+    &nbsp;
+    &nbsp;
+    &nbsp;
+    <a [routerLink]="[ '/admin']">
+      <button mat-flat-button color="accent">Create</button>
+    </a>
+    <br>
+    <br>
+    <br>
+    <br>
+  </div>
+</div>
