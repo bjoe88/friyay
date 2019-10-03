@@ -1,10 +1,23 @@
-import { WebSocketGateway, WebSocketServer, SubscribeMessage, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
+import {
+    WebSocketGateway,
+    WebSocketServer,
+    SubscribeMessage,
+    OnGatewayConnection,
+    OnGatewayDisconnect,
+    WsResponse,
+} from '@nestjs/websockets';
 
 @WebSocketGateway()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
-
     @WebSocketServer() server;
     users: number = 0;
+    gameRoom: any = {
+        1: {
+            clients: [],
+            status: [],
+            metadata: [],
+        },
+    };
 
     async handleConnection() {
 
@@ -26,9 +39,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     }
 
-    @SubscribeMessage('chat')
-    async onChat(client, message) {
-        client.broadcast.emit('chat', message);
+    @SubscribeMessage('msg')
+    handleEvent(client, data: { type: string, code: string }): WsResponse<unknown> {
+        const event = 'msg';
+        let respond: any = { event, data: 'UNDEFINED' };
+        switch (data.type) {
+            case 'JOIN_GAME':
+                // Check if game exist
+                if (!this.gameRoom[data.code]) {
+                    respond.data = 'INVALID_CODE';
+                } else {
+                    respond.data = this.gameRoom[data.code];
+                }
+                break;
+        }
+        console.log(respond)
+        return respond;
     }
-
 }

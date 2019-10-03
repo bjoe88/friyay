@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { WsService } from '../../shared/services/ws.service';
 
 @Component({
   selector: 'app-game',
@@ -6,10 +7,12 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./game.component.sass']
 })
 export class GameComponent implements OnInit {
-
-  constructor() { }
+  code = '';
+  constructor(private ws: WsService) { }
 
   ngOnInit() {
   }
-
+  join() {
+    this.ws.joinGame(this.code);
+  }
 }
