@@ -42,14 +42,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @SubscribeMessage('msg')
     handleEvent(client, data: { type: string, code: string }): WsResponse<unknown> {
         const event = 'msg';
-        let respond: any = { event, data: 'UNDEFINED' };
+        const respond: any = {
+            event, data: {
+                code: 'UNDEFINED',
+            },
+        };
         switch (data.type) {
             case 'JOIN_GAME':
                 // Check if game exist
                 if (!this.gameRoom[data.code]) {
-                    respond.data = 'INVALID_CODE';
+                    respond.data.code = 'INVALID_CODE';
                 } else {
-                    respond.data = this.gameRoom[data.code];
+                    respond.data.code = 'JOIN_GAME';
+                    respond.data.data = this.gameRoom[data.code];
                 }
                 break;
         }

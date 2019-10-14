@@ -16,18 +16,16 @@ export class WsService {
   }
 
   joinGame(code: string) {
-    console.log('asd');
 
     const message: Message = {
       type: 'JOIN_GAME',
       code
     };
-    console.log('asd');
     this.socket.emit('msg', message);
   }
 
-  receiveChat() {
-    return this.socket.fromEvent('chat');
+  receiveMsg() {
+    return this.socket.fromEvent('msg');
   }
 
   getUsers() {
