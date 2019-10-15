@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { WsService } from '../../shared/services/ws.service';
+import { Breakpoints } from '@angular/cdk/layout';
+
+enum Status { NEW_GAME = 'NEW_GAME', JOIN_GAME = 'JOIN_GAME' }
 
 @Component({
   selector: 'app-game',
@@ -8,7 +11,9 @@ import { WsService } from '../../shared/services/ws.service';
 })
 export class GameComponent implements OnInit {
   code = '';
-  status = 'JOIN_GAME';
+  status: Status = Status.NEW_GAME;
+  result = false;
+  questions = null;
   constructor(private ws: WsService) { }
 
   ngOnInit() {
@@ -25,8 +30,20 @@ export class GameComponent implements OnInit {
     const self = this;
     switch (msg.code) {
       case 'JOIN_GAME':
-        this.status = msg.code;
+        self.status = Status.JOIN_GAME;
         break;
+    }
+  }
+  whatStatus(status: string): boolean {
+    const self = this;
+    return status === this.status;
+    switch (status) {
+      case 'NEW_GAME':
+        return self.status === Status.NEW_GAME;
+      case 'JOIN_GAME':
+        return self.status === Status.JOIN_GAME;
+      case 'NEW_GAME':
+        return self.status === Status.NEW_GAME;
     }
   }
 }
