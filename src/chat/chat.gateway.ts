@@ -9,10 +9,16 @@ import {
 import * as Fs from 'fs';
 
 enum ClientStatus {
+    GET_CLIENT_CODE = 'GET_CLIENT_CODE',
+    SEND_CLIENT_CODE = 'SEND_CLIENT_CODE',
     INVALID_CODE = 'INVALID_CODE',
     NEW_GAME = 'NEW_GAME',
     JOIN_GAME = 'JOIN_GAME',
     START_GAME = 'START_GAME',
+    QUESTION = 'QUESTION',
+    RESULT = 'RESULT',
+    ANSWER = 'ANSWER',
+    ENDGAME = 'ENDGAME',
 }
 enum AdminStatus { INVALID_CODE = 'INVALID_CODE', START_GAME = 'START_GAME' }
 
@@ -26,38 +32,37 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             clients: [],
             status: [],
             metadata: [],
+            clientData: []
         },
     };
+    clientIdMapKey = {};
 
-
-    async handleConnection() {
-
-        // A client has connected
+    async handleConnection(client: any) {
         this.users++;
-
-        // Notify connected clients of current users
-        this.server.emit('users', this.users);
-
+        client.emit('msg', { code: ClientStatus.GET_CLIENT_CODE });
     }
 
     async handleDisconnect() {
-
-        // A client has disconnected
         this.users--;
-
-        // Notify connected clients of current users
-        this.server.emit('users', this.users);
-
     }
 
     @SubscribeMessage('msg')
-    handleEvent(client, data: { type: string, code: string }): WsResponse<unknown> {
+    handleEvent(client, data: { type: string, code?: string, clientKey?: string }): WsResponse<unknown> {
+        const self = this;
         const event = 'msg';
         const respond: any = {
             event, data: {
                 code: ClientStatus.INVALID_CODE,
             },
         };
+        if (data.type === ClientStatus.SEND_CLIENT_CODE) {
+            self.clientIdMapKey[client.id] = data.clientKey;
+            return;
+        }
+        if (!self.clientIdMapKey[client.id]) {
+            client.emit('msg', { code: ClientStatus.GET_CLIENT_CODE });
+            return;
+        }
         switch (data.type) {
             case ClientStatus.JOIN_GAME:
                 // Check if game exist
@@ -68,6 +73,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                     gameRoom.clients.push(client);
                     respond.data.code = ClientStatus.JOIN_GAME;
                     respond.data.data = gameRoom.metadata;
+                }
+
+                //Link with user if exist. else create new link
+                let gameRoomClient = gameRoom.clientData[self.clientIdMapKey[client.id]];
+                if (!gameRoomClient) {
+                    gameRoomClient = gameRoom.clientData[self.clientIdMapKey[client.id]] = {
+                        question: 0,
+                    };
                 }
                 break;
         }
@@ -90,7 +103,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 if (!gameRoom) {
                     respond.data.code = AdminStatus.INVALID_CODE;
                 } else {
-                    console.log(gameRoom.clients.length)
                     gameRoom.clients.forEach(client => {
                         this.adminStartClient(client);
                     });
@@ -108,6 +120,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 code: ClientStatus.START_GAME,
             },
         };
-        client.emit(respond)
+        client.emit(respond.event, respond.data);
+
+    }
+
+    getQuestion(client) {
+        const self = this;
     }
 }
