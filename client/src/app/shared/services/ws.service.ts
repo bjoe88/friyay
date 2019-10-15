@@ -16,13 +16,13 @@ export class WsService {
   }
 
   joinGame(code: string) {
-
     const message: Message = {
       type: 'JOIN_GAME',
       code
     };
     this.socket.emit('msg', message);
   }
+
 
   receiveMsg() {
     return this.socket.fromEvent('msg');
@@ -32,4 +32,11 @@ export class WsService {
     return this.socket.fromEvent('users');
   }
 
+  adminStartGame(code: string) {
+    const message: Message = {
+      type: 'START_GAME',
+      code
+    };
+    this.socket.emit('msgAdmin', message);
+  }
 }
