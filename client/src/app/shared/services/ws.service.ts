@@ -15,14 +15,11 @@ export class WsService {
 
   }
 
-  joinGame(code: string) {
-    const message: Message = {
-      type: 'JOIN_GAME',
-      code
-    };
+  emit(type: any, data: any) {
+    const message = data;
+    message.type = type;
     this.socket.emit('msg', message);
   }
-
 
   receiveMsg() {
     return this.socket.fromEvent('msg');
