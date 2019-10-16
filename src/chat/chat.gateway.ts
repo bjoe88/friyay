@@ -20,7 +20,10 @@ enum ClientStatus {
     ANSWER = 'ANSWER',
     ENDGAME = 'ENDGAME',
 }
+
 enum AdminStatus { INVALID_CODE = 'INVALID_CODE', START_GAME = 'START_GAME' }
+
+enum GameRoomStatus { NEW_GAME = 0, START_GAME = 1, END_GAME = 2 }
 
 @WebSocketGateway()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -30,7 +33,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     gameRoom: any = {
         1: {
             clients: [],
-            status: [],
+            status: GameRoomStatus.NEW_GAME,
             metadata: [],
             clientData: []
         },
@@ -66,7 +69,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         switch (data.type) {
             case ClientStatus.JOIN_GAME:
                 // Check if game exist
-                const gameRoom = this.gameRoom[data.code];
+                const gameRoom = self.gameRoom[data.code];
                 if (!gameRoom) {
                     respond.data.code = ClientStatus.INVALID_CODE;
                 } else {
@@ -82,14 +85,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                         question: 0,
                     };
                 }
+                client.emit('msg', respond.data);
+                if (gameRoom.status === GameRoomStatus.START_GAME) {
+                    self.sendQuestion(gameRoom, client);
+                }
                 break;
         }
-        return respond;
+        return;
     }
 
 
     @SubscribeMessage('msgAdmin')
     handleEventAdmin(admin, data: { type: string, code: string }): WsResponse<unknown> {
+        const self = this;
         const event = 'msg';
         let respond: any = {
             event, data: {
@@ -103,14 +111,27 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 if (!gameRoom) {
                     respond.data.code = AdminStatus.INVALID_CODE;
                 } else {
+                    gameRoom.status = GameRoomStatus.START_GAME;
                     gameRoom.clients.forEach(client => {
                         this.adminStartClient(client);
+                        this.sendQuestion(gameRoom, client);
                     });
                     respond = null;
                 }
                 break;
         }
         return respond;
+    }
+
+    adminSendClientQuestion(question, client) {
+        const respond: any = {
+            event: 'msg',
+            data: {
+                code: ClientStatus.QUESTION,
+                question,
+            },
+        };
+        client.emit(respond.event, respond.data);
     }
 
     adminStartClient(client) {
@@ -121,10 +142,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             },
         };
         client.emit(respond.event, respond.data);
-
     }
 
-    getQuestion(client) {
+    sendQuestion(gameRoom, client) {
         const self = this;
+        const question = { ...(self.getQuestion(gameRoom.clientData[self.clientIdMapKey[client.id]].question)) };
+        question.question.answer = null;
+        this.adminSendClientQuestion(question, client);
+    }
+
+    getQuestion(questionNumber) {
+        const self = this;
+        return self.questions[questionNumber];
     }
 }
