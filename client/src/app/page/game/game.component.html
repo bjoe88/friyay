@@ -19,15 +19,19 @@
   <div [ngClass]="{'wait-question': true}" *ngIf="!question && !result">
     Please Wait for the question!!!
   </div>
+</div>
+<div [ngClass]="{'join-game': true}" *ngIf="whatStatus('RESULT') ">
   <div [ngClass]="{'result-question': true}" *ngIf="!!result">
     Result
   </div>
-<div [ngClass]="{'question': true}" *ngIf="!!question">
-  {{question.question.data}}
 </div>
-<div [ngClass]="{'answer': true}" *ngIf="!!question">
-  <ul>
-    <li *ngFor="let answer of question.answer">{{ answer.data }}</li>
-  </ul>
-</div>
+<div [ngClass]="{'join-game': true}" *ngIf="whatStatus('QUESTION') ">
+  <div [ngClass]="{'question': true}" *ngIf="!!question">
+    {{question.question.data}}
+  </div>
+  <div [ngClass]="{'answer': true}" *ngIf="!!question">
+    <ul>
+      <li *ngFor="let answer of question.answer">{{ answer.data }}</li>
+    </ul>
+  </div>
 </div>

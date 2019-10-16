@@ -24,7 +24,7 @@ export class GameComponent implements OnInit {
   code = '';
   status: Status = Status.NEW_GAME;
   result = false;
-  questions = null;
+  question = null;
   constructor(private ws: WsService) { }
 
   ngOnInit() {
@@ -71,6 +71,7 @@ export class GameComponent implements OnInit {
         break;
       case Status.QUESTION:
         self.status = Status.QUESTION;
+        self.question =  msg.question;
         break;
       case Status.ANSWER:
         self.status = Status.ANSWER;
